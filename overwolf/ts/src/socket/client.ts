@@ -1,0 +1,12 @@
+export const MSG_CODE = {
+  CONNECT: 0,
+  AUDIO_INPUT: 1,
+  SER_INPUT: 2,
+  SER_RESULT: 3,
+  IMAGE_INPUT: 4,
+  FER_INPUT: 5,
+  FER_RESULT: 6,
+  PULSE_INPUT: 7,
+  PULSE_DATA: 8,
+  CSV_EXPORT: 9,
+};

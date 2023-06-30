@@ -1,0 +1,262 @@
+/* Header */
+.header {
+  border-bottom: 4px solid #232f35;
+  display: flex;
+  flex-flow: row nowrap;
+  width: 100%;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.left-container,
+.right-container {
+  display: flex;
+  flex-flow: row nowrap;
+  width: 100%;
+  z-index: 1;
+}
+
+.left-container {
+  justify-content: flex-start;
+}
+
+.right-container {
+  justify-content: flex-end;
+}
+
+.nav-left,
+.nav-right {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-around;
+  align-items: center;
+  color: #fff;
+}
+
+.nav-right {
+  flex-basis: 150px;
+  margin: 0 25px;
+}
+
+/* Main */
+.container {
+  margin: 20px 30px;
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-around;
+  align-content: space-around;
+  align-items: stretch;
+  column-gap: 20px;
+  row-gap: 20px;
+}
+
+.item {
+  flex-basis: auto;
+
+  background: #232f35;
+  border-radius: 15px;
+
+  padding: 0 20px 20px 20px;
+}
+
+#review-card {
+  flex-basis: 30%;
+}
+
+#graphs-card {
+  flex-grow: 1;
+  flex-basis: 50%;
+  flex-shrink: 1;
+}
+
+#table-card {
+  flex-basis: 36%;
+}
+
+#emotions-card {
+  flex-grow: 1;
+}
+
+.heading-background {
+  background: #161f22;
+  border-radius: 15px;
+  width: 100px;
+  height: 30px;
+  margin-bottom: 15px;
+}
+
+/* Settings Menu */
+.settings-dropdown a:hover .material-symbols-rounded {
+  color: green;
+}
+
+.settings-dropdown:hover .settings-menu {
+  display: block;
+}
+
+.settings-menu {
+  display: none;
+  right: 0;
+  position: absolute;
+  background-color: #161f22;
+  min-width: 160px;
+  border-radius: 15px;
+  border: 2px solid #43555e;
+  padding: 10px;
+  z-index: 1;
+  margin-right: 30px;
+  font-family: Nunito;
+}
+
+.settings-menu span {
+  font-weight: bold;
+}
+
+.checkbox-container {
+  display: block;
+  position: relative;
+  margin: 12px 0 6px 0;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* General */
+.background {
+  background: #161f22;
+}
+
+.material-symbols-rounded {
+  font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 48;
+  color: #43555e;
+}
+
+h2 {
+  font-family: "Nunito";
+  text-align: center;
+  color: white;
+}
+
+h3 {
+  font-family: "Nunito";
+  text-align: center;
+  color: white;
+}
+
+ul {
+  list-style: none;
+}
+
+body {
+  padding: 0;
+  margin: 0;
+}
+
+a {
+  text-decoration: none;
+  font-family: sans-serif;
+  color: hsla(0, 0%, 100%, 0.7);
+}
+
+#logo {
+  width: 13rem;
+  height: auto;
+}
+
+.medium-duck {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 75%;
+}
+
+.angry-duck {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 40%;
+}
+
+.chilled-duck {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 75%;
+}
+
+#graph {
+  height: auto;
+  width: 100%;
+}
+
+#emotions {
+  height: auto;
+  width: 100%;
+}
+
+.background-graph {
+  background: #232f35;
+  border-radius: 15px;
+  margin-right: auto;
+}
+
+table {
+  font-family: "Nunito";
+  color: white;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.table.table-dark.table-hover th {
+  background: #43555e;
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+td {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+footer {
+  text-align: center;
+  padding-bottom: 10px;
+  display: flex;
+  flex-flow: row nowrap;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+small {
+  font-family: "Nunito";
+  color: #43555e;
+  margin-left: 5px;
+}
+
+hr {
+  color: white;
+}
+
+.itemHeader {
+  text-align: left;
+  margin-top: 6px;
+}
+.heading-background {
+  padding: 0 20px;
+}
+tr {
+  cursor: pointer;
+}
+#eventDetailBody {
+  color: white;
+}
+table.table {
+  display: block;
+  max-height: 300px;
+  overflow-y: scroll;
+}

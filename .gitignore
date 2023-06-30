@@ -1,0 +1,36 @@
+.vscode
+.idea
+recognizer/python/assets/fer/fer_imgs
+
+
+# exclude models
+facial-expression-rec/model.h5
+speech-emotion-rec/model.h5
+
+# License not clear (by Overwolf)
+
+overwolf/native
+
+overwolf/ts/public/icons/desktop-icon_old.ico
+overwolf/ts/public/icons/IconMouseNormal.png
+overwolf/ts/public/icons/IconMouseOver.png
+
+overwolf/ts/public/img/background.svg
+overwolf/ts/public/img/facebook.svg
+overwolf/ts/public/img/reddit.svg
+overwolf/ts/public/img/twitter.svg
+overwolf/ts/public/img/cool_wolf.png
+overwolf/ts/public/img/window_close.svg
+overwolf/ts/public/img/window_close.svg
+overwolf/ts/public/img/window_maximize.svg
+overwolf/ts/public/img/window_minimize.svg
+overwolf/ts/public/img/window_restore.svg
+overwolf/ts/public/img/window_settings.svg
+overwolf/ts/public/img/window_support.svg
+
+overwolf/ts/releases
+
+overwolf/ts/src/AppWindow.ts
+
+overwolf/ts/overwolf.webpack.js
+overwolf/ts/overwolf.webpack.js

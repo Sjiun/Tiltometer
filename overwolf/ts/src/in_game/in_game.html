@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="../../css/bootstrap.min.css" />
+
+    <link rel="stylesheet" href="../../css/general.css" />
+    <link rel="stylesheet" href="../../css/header.css" />
+    <link rel="stylesheet" href="../../css/ingame.css" />
+    <link rel="stylesheet" href="../../css/modal.css" />
+
+    <link rel="stylesheet" href="../../css/tiltometer.css" />
+
+    <title>Overwolf Sample App - In-Game page</title>
+  </head>
+  <body class="in-game">
+    <!-- -------------------------------- Header ------------------------------- -->
+
+    <header id="header" class="app-header">
+      <img src="../../icons/desktop-icon.ico" style="height: 20px" />
+      <h1>Tilt-O-Meter / in game window</h1>
+      <h1 class="hotkey-text">Show/Hide Hotkey: Ctrl + F</h1>
+      <div class="window-controls-group">
+        <button
+          id="minimizeButton"
+          class="window-control window-control-minimize"
+        />
+        <button
+          id="maximizeButton"
+          class="window-control window-control-maximize"
+        />
+        <button id="closeButton" class="window-control window-control-close" />
+      </div>
+    </header>
+    <main>
+      <div class="background">
+        <div class="container headerContainer">
+          <h1 class="h1 text-white">Tilt-O-Meter</h1>
+          <div>
+            <button id="connectWsBttn" class="btn btn-secondary">
+              connect
+            </button>
+            <span style="color: white">Device-Manager: </span>
+            <span id="wsConnStatus">&nbsp;</span>
+            <button class="btn btn-secondary" id="disconnectWsBttn" disabled>
+              disconnect
+            </button>
+            <button id="exportBttn" class="btn btn-secondary" disabled>
+              export
+            </button>
+          </div>
+        </div>
+
+        <div class="container">
+          <div class="item" id="graphs-card">
+            <h3 class="itemHeader">
+              <span class="heading-background">Graphs</span>
+            </h3>
+            <h3>Graphs</h3>
+            <div class="background-graph">
+              <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <button
+                    class="nav-link active"
+                    id="pulse-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#pulse-tab-pane"
+                    type="button"
+                    role="tab"
+                    aria-controls="pulse-tab-pane"
+                    aria-selected="true"
+                  >
+                    Pulse
+                  </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button
+                    class="nav-link"
+                    id="fer-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#fer-tab-pane"
+                    type="button"
+                    role="tab"
+                    aria-controls="fer-tab-pane"
+                    aria-selected="false"
+                  >
+                    FER
+                  </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button
+                    class="nav-link"
+                    id="ser-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#ser-tab-pane"
+                    type="button"
+                    role="tab"
+                    aria-controls="ser-tab-pane"
+                    aria-selected="false"
+                  >
+                    SER
+                  </button>
+                </li>
+              </ul>
+              <div class="tab-content" id="myTabContent">
+                <div
+                  class="tab-pane fade show active"
+                  id="pulse-tab-pane"
+                  role="tabpanel"
+                  aria-labelledby="pulse-tab"
+                  tabindex="0"
+                >
+                  <!-- PULSE TAB CONTENT -->
+                  <canvas id="pulseChart"></canvas>
+                </div>
+                <div
+                  class="tab-pane fade"
+                  id="fer-tab-pane"
+                  role="tabpanel"
+                  aria-labelledby="fer-tab"
+                  tabindex="0"
+                >
+                  <canvas id="ferChart"></canvas>
+                </div>
+                <div
+                  class="tab-pane fade"
+                  id="ser-tab-pane"
+                  role="tabpanel"
+                  aria-labelledby="ser-tab"
+                  tabindex="0"
+                >
+                  <canvas id="serChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="item" id="review-card">
+            <h3 class="itemHeader">
+              <span class="heading-background">Tilt-Level</span>
+              <span id="tiltValue">&nbsp;-</span>
+            </h3>
+
+            <div id="tiltChart"></div>
+
+            <div class="container chickenContainer">
+              <img
+                id="chickenImg"
+                src="/img/chicken_happy.png"
+                alt=""
+                srcset=""
+              />
+            </div>
+          </div>
+          <div class="item" id="table-card">
+            <h3 class="itemHeader">
+              <span class="heading-background">Log</span>
+            </h3>
+
+            <table class="table table-dark table-hover">
+              <tbody id="processedLogTableBody">
+                <tr>
+                  <th>Time</th>
+                  <th>Type</th>
+                  <th>Data</th>
+                  <th>ID</th>
+                  <th>Tilt-Modifier</th>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="item" id="emotions-card">
+            <h3 class="itemHeader">
+              <span class="heading-background">Event Detail</span>
+            </h3>
+
+            <div id="eventDetailBody">
+              <canvas id="detailChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <br />
+
+        <br />
+        <hr />
+        <br />
+
+        <div class="container">
+          <button
+            class="btn btn-primary"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#collapseRawLogs"
+            aria-expanded="false"
+            aria-controls="collapseRawLogs"
+          >
+            Toggle raw data logs
+          </button>
+
+          <!-- raw logs -->
+
+          <div class="collapse" id="collapseRawLogs">
+            <div class="card card-body background rawLogsCardBody">
+              <h2>Raw data</h2>
+              <div id="logs">
+                <div id="events" class="update-container logColumn">
+                  <h3>Game Events</h3>
+                  <div id="eventsLog" class="dataText"></div>
+                </div>
+                <div id="infoUpdates" class="update-container logColumn">
+                  <h3>Info Updates</h3>
+                  <div id="infoLog" class="dataText"></div>
+                </div>
+                <div id="ferUpdates" class="update-container logColumn">
+                  <h3>FER Data</h3>
+                  <div id="ferLog" class="dataText">
+                    <ul id="ferList"></ul>
+                  </div>
+                </div>
+                <div id="serUpdates" class="update-container logColumn">
+                  <h3>SER Data</h3>
+                  <div id="serLog" class="dataText">
+                    <ul id="serList"></ul>
+                  </div>
+                </div>
+                <div id="pulseUpdates" class="update-container logColumn">
+                  <h3>Pulse Data</h3>
+                  <div id="pulseLog" class="dataText">
+                    <ul id="pulseList"></ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <footer>
+            <span class="material-symbols-rounded"> copyright </span>
+            <small>Entilted GmbH & Co. KG</small>
+          </footer>
+        </div>
+      </div>
+    </main>
+    <script src="../../js/bootstrap.min.js"></script>
+  </body>
+</html>
