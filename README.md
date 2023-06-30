@@ -1,6 +1,5 @@
 # README
 
-
 ## About
 
 The "Tilt-O-Meter" is a real time multi-app software that can collect, interpret and display various types of sensor data on a user playing League of Legends. In the current implementation, utilized sensor data include:
@@ -21,7 +20,7 @@ The goal of the "Tilt-O-Meter" is to infer a user's level of tilt in real time a
 
 <!-- ## Screenshots -->
 
-graphs and tilt value             |  Event log and details
+Graphs and tilt value             |  Event log and details
 :-------------------------:|:-------------------------:
 ![screenshot](demo/overlay-graphs.jpg)  |  ![screenshot](demo/overlay-detail.jpg)
 
@@ -79,17 +78,17 @@ docker build -t ser .
 
 If you want to use the same model we have trained and used please get in touch. Otherwise, add your model to `./speech-emotion-rec/` and adapt the code inside `./speech-emotion-rec/ser.py` according toyour models output format.  
 
-### build Overwolf-extension
+### Build Overwolf-extension
 
 #### License unclear
 
-A lot of the code inside the 'overwolf' directory was developed by using the [Overwolf Sample App](https://github.com/overwolf/sample-app) as a starting point. Since no license has been specified by Overwolf for the code inside the [Overwolf Sample App](https://github.com/overwolf/sample-app), we unfortunately can't include the unlicensed extension code inside this repository.
+A lot of the code inside the `overwolf` directory was developed by using the [Overwolf Sample App](https://github.com/overwolf/sample-app) as a starting point. Since no license has been specified by Overwolf for the code inside the [Overwolf Sample App](https://github.com/overwolf/sample-app), we unfortunately can't include the unlicensed extension code inside this repository.
 
-In order to run the code from 'overwolf' directory, follow these steps:
+In order to run the code from `overwolf` directory, follow these steps:
 1. clone the Overwolf Sample App at the root level of this repository
 2. move all files from this directory into the Overwolf Sample App (replace existing files)
 3. delete this - now empty - directory
-4. rename the Overwolf Sample App directory to 'overwolf'
+4. rename the Overwolf Sample App directory to `overwolf`
 
 After the template's code has been added, run the following commands: 
 
