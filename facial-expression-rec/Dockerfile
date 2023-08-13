@@ -18,7 +18,8 @@ RUN pip install -r requirements.txt
 # copy after install to allow caching installations
 COPY input-img_example.base64 .
 COPY __init__.py .
+COPY face_detector.py .
+COPY hs_emotion_recognizer.py .
 COPY fer.py .
-COPY facial_emotions.py . 
 
 CMD ["python", "fer.py"]

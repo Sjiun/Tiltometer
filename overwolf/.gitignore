@@ -1,6 +1,4 @@
 ﻿node_modules
+package-lock.json
+ts/README.md
 yarn.lock
-
-
-
-

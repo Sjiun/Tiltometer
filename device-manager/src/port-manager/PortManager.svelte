@@ -18,7 +18,7 @@
   ws.onmessage = handleMessage;
 
   function handleConnectionOpened() {
-    const greetingString = "Hello from DEVICE-MANAGER";
+    const greetingString = "DEVICE MANAGER IS UP AND CONNECTED";
     console.log("Sending connection message to server");
     ws.send(JSON.stringify([MSG_CODE["CONNECT"], greetingString]));
   }
@@ -50,5 +50,5 @@
   <div class="header">
     <h1>PORT CONNECTION</h1>
   </div>
-  do some port stuff
+  to be done
 </div>
