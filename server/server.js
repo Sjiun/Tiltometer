@@ -23,6 +23,7 @@ const MSG_CODE = {
 
 
 wss.on('connection', function connection(ws) {
+    console.log('WebSocket server is listening on port 5000')
     ws.on('message', function incoming(msgString) {
         handleIncomingMessageFromWs(msgString, ws)
 
