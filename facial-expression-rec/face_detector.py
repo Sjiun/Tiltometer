@@ -11,13 +11,14 @@ class FaceDetector:
     def detect_face(self, image: np.ndarray) -> np.ndarray:
         """
         Detects a face on the given image and crops it accordingly.
-        If no face is detected, the image is not cropped.
+        Returns None if no face is detected.
         :param image: numpy array of shape (height, width, channels)
         :return: cropped numpy array of shape (height, width, channels)
         """
         results = self.face_mesh.process(image)
         if not results.multi_face_landmarks:
-            return image
+            # return image
+            return None
         face_landmarks = results.multi_face_landmarks[0]
         height, width, _ = image.shape
         x1 = y1 = 1

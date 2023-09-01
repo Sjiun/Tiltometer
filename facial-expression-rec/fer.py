@@ -68,21 +68,24 @@ def recognize_emotions_from_image(image: np.ndarray) -> Dict[str, float]:
 def get_fer_result_from_server_message(msg_content: str) -> Dict[str, float]:
     image_to_recognize = decode_image_from_string(msg_content)
     face_image = face_detector.detect_face(image_to_recognize)
+    if face_image == None:
+            return None
     fer_result = recognize_emotions_from_image(face_image)
     return fer_result
 
 
 async def handle_incoming_message_from_websocket(msg_content: str, msg_time, websocket):
     fer_result = get_fer_result_from_server_message(msg_content)
-    print('---')
-    print('FER result: ', fer_result)
-    fer_res_string = json.dumps(fer_result)
-    # send the FER result back to the server (as a string)
-    fer_result_message = json.dumps(
-        [MSG_CODE['FER_RESULT'], fer_res_string, msg_time])
-    print(fer_result_message)
-    print('---')
-    await websocket.send(fer_result_message)
+    if fer_result != None:
+        print('---')
+        print('FER result: ', fer_result)
+        fer_res_string = json.dumps(fer_result)
+        # send the FER result back to the server (as a string)
+        fer_result_message = json.dumps(
+            [MSG_CODE['FER_RESULT'], fer_res_string, msg_time])
+        print(fer_result_message)
+        print('---')
+        await websocket.send(fer_result_message)
 
 
 async def websocket_handler():
