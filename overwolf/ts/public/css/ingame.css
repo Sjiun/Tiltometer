@@ -181,7 +181,8 @@ main {
 }
 
 #tiltChart > div {
-  background-image: url(/img/tiltometer_bg-dark-mirrored.jpeg);
+  /* background-image: url(/img/tiltometer_bg-dark-mirrored.jpeg); */
+  background-image: url(/img/tiltometer_bg-dark.jpeg);
   background-size: contain;
   background-repeat: no-repeat;
   background-position-y: 15px;

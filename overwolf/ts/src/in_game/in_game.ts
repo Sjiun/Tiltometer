@@ -402,6 +402,7 @@ function calcNewTiltValueFromEvent(type, data) {
       fer_tilt_value =
         (secsSinceLastFerUpd / 100) * getTiltValueFromFerData(data) +
         ((100 - secsSinceLastFerUpd) / 100) * fer_tilt_value;
+      fer_tilt_value *= -1;
       last_fer_update = timeNow;
       break;
     case "ser":
@@ -409,10 +410,12 @@ function calcNewTiltValueFromEvent(type, data) {
       ser_tilt_value =
         (secsSinceLastSerUpd / 100) * getTiltValueFromSerData(data) +
         ((100 - secsSinceLastSerUpd) / 100) * ser_tilt_value;
+      ser_tilt_value *= -1;
       last_ser_update = timeNow;
       break;
     case "ge":
-      ge_tilt_value += getTiltValueFromGameEventData(data);
+      // ge_tilt_value += getTiltValueFromGameEventData(data);
+      ge_tilt_value -= getTiltValueFromGameEventData(data);
       break;
     default:
       break;
@@ -530,9 +533,8 @@ function exportEventListAsCsv() {
   eventList.forEach(function (eventData) {
     console.log(eventData.data);
 
-    csvContent += `${eventData.time}\t${eventData.type}\t${
-      eventData.tilt_mod
-    }\t${JSON.stringify(eventData.data)}\r\n`;
+    csvContent += `${eventData.time}\t${eventData.type}\t${eventData.tilt_mod
+      }\t${JSON.stringify(eventData.data)}\r\n`;
   });
   console.log(csvContent);
 
