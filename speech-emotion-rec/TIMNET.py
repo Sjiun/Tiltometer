@@ -64,7 +64,6 @@ class TIMNET:
         forward = inputs
         backward = K.reverse(inputs, axes=1)
 
-        print("Input Shape=", inputs.shape)
         forward_convd = Conv1D(filters=self.nb_filters, kernel_size=1, dilation_rate=1, padding='causal')(forward)
         backward_convd = Conv1D(filters=self.nb_filters, kernel_size=1, dilation_rate=1, padding='causal')(backward)
 

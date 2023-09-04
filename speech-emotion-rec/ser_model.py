@@ -77,7 +77,6 @@ class TIMNET_Model(Common_Model):
                            optimizer=Adam(learning_rate=lr, beta_1=beta1, beta_2=beta2,
                                           epsilon=epsilon),
                            metrics=['accuracy'])
-        print("Temporal create success!")
 
     def load_weights(self, model_path):
         self.model.load_weights(model_path)

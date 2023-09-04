@@ -43,10 +43,8 @@ MEAN_SIGNAL_LENGTH = 110000
 
 
 def get_feature(file_path: str,
-                feature_type: str = "MFCC",
                 mean_signal_length: int = MEAN_SIGNAL_LENGTH,
                 embed_len: int = 39) -> np.ndarray:
-    feature = None
     signal, fs = librosa.load(file_path)
     s_len = len(signal)
     if s_len < mean_signal_length:
@@ -58,9 +56,9 @@ def get_feature(file_path: str,
         pad_len = s_len - mean_signal_length
         pad_len //= 2
         signal = signal[pad_len:pad_len + mean_signal_length]
-    if feature_type == "MFCC":
-        mfcc = librosa.feature.mfcc(y=signal, sr=fs, n_mfcc=embed_len)
-        feature = np.transpose(mfcc)
+
+    mfcc = librosa.feature.mfcc(y=signal, sr=fs, n_mfcc=embed_len)
+    feature = np.transpose(mfcc)
     return feature
 
 
