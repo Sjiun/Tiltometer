@@ -1,35 +1,21 @@
 import asyncio
-import struct
+import json
+import socket
 import wave
+from collections import deque
+from typing import Optional, Dict
 
 import librosa
-from pydub import AudioSegment, effects
-from websockets import connect
-from keras import models
-import pyaudio
 import numpy as np
-from array import array
-import json
-import noisereduce as nr
+from websockets import connect
 
-# Initialize variables
-RATE = 44100
-CHUNK = 4096
-RECORD_SECONDS = 7.1
+from ser_model import TIMNET_Model
 
-FORMAT = pyaudio.paInt32
-CHANNELS = 1
-WAVE_OUTPUT_FILE = "output.wav"
+# Address of the WebSocket server, which is expected run at the docker host machine.
+# The code below should work on Windows with Docker Desktop.
+# For linux you may use your machine's IPv4 address.
+URI = f'ws://{socket.gethostbyname("host.docker.internal")}:5000'
 
-MAYBE_TOO_BIG_FOR_C = 30
-
-# local machine's IP goes here.
-# Port corresponds to where websocket server is running (`./server/server.js`)
-uri = "ws://192.168.178.31:5000"
-
-global_frames = []
-
-# ein paar Codes, um zwischen Port-Nachrichten zu unterscheiden
 MSG_CODE = {
     'CONNECT': 0,
     'AUDIO_INPUT': 1,
@@ -43,145 +29,100 @@ MSG_CODE = {
     'CSV_EXPORT': 9,
 }
 
-model = models.load_model("model.h5")
+# Model and Feature Extraction Code is based on https://github.com/Jiaxin-Ye/TIM-Net_SER
+
+MODEL_PATH = './10-fold_weights_best_1.hdf5'
+RAVDESS_CLASS_LABELS = ("angry", "calm", "disgust", "fear", "happy", "neutral", "sad", "surprise")
+
+model = TIMNET_Model(input_shape=(188, 39), class_labels=RAVDESS_CLASS_LABELS,
+                     filter_size=39, kernel_size=2, stack_size=1, dilation_size=8,
+                     dropout=0.1, activation='relu', lr=0.001, beta1=0.93, beta2=0.98, epsilon=1e-8)
+model.load_weights(MODEL_PATH)
+
+MEAN_SIGNAL_LENGTH = 110000
 
 
-async def recognize_emotions_from_wav_file():
-    x = preprocess(WAVE_OUTPUT_FILE)
-    prediction_ndarray = model.predict(x, use_multiprocessing=True)[0]
-    prediction_array = prediction_ndarray.tolist()
+def get_feature(file_path: str,
+                feature_type: str = "MFCC",
+                mean_signal_length: int = MEAN_SIGNAL_LENGTH,
+                embed_len: int = 39) -> np.ndarray:
+    feature = None
+    signal, fs = librosa.load(file_path)
+    s_len = len(signal)
+    if s_len < mean_signal_length:
+        pad_len = mean_signal_length - s_len
+        pad_rem = pad_len % 2
+        pad_len //= 2
+        signal = np.pad(signal, (pad_len, pad_len + pad_rem), 'constant', constant_values=0)
+    else:
+        pad_len = s_len - mean_signal_length
+        pad_len //= 2
+        signal = signal[pad_len:pad_len + mean_signal_length]
+    if feature_type == "MFCC":
+        mfcc = librosa.feature.mfcc(y=signal, sr=fs, n_mfcc=embed_len)
+        feature = np.transpose(mfcc)
+    return feature
+
+
+'''
+Following the training of the model we are using, we want a signal_length of 110k.
+The original feature extraction loads data at librosa's default sampling rate of 22.05 kHz
+Our training data's (RAVDESS) original sampling rate is 48 kHz.
+We receive data in chunks as Float32Arrays of length 4096 from the device manager. Data is recorded at 48 kHz.
+To achieve a signal_length of 110k, we need a buffer capacity of 110000/(22.05/48)=239456 for the data sampled at 48kHz.
+That is about 5 seconds.
+'''
+BUFFER_CAPACITY = 239456
+buffer_deque = deque(maxlen=BUFFER_CAPACITY)
+dtype = np.float32
+chunk_counter = 0
+WAVE_OUTPUT_FILE = "output.wav"
+
+
+async def recognize_emotions_from_wav_file() -> Dict[str, float]:
+    feature_vector = get_feature(WAVE_OUTPUT_FILE)
+    feature_vector = np.expand_dims(feature_vector, axis=0)
+    prediction_array = model.predict(feature_vector).tolist()
 
     prediction = {
-        "neutral": prediction_array[0],
-        "happy": prediction_array[1],
-        "sad": prediction_array[2],
-        "angry": prediction_array[3],
-        "surprise": prediction_array[4],
+        "neutral": prediction_array[5],
+        "happy": prediction_array[4],
+        "sad": prediction_array[6],
+        "angry": prediction_array[0],
+        "surprise": prediction_array[7],
     }
     return prediction
 
 
-# Über den port wird nur ein string weitergegeben, der für SER wieder decoded werden muss
-async def decode_speech_from_string(string: str):
-    buffer_input_array = array(
-        "l", [int(i * pow(2, MAYBE_TOO_BIG_FOR_C)) for i in list(string.values())])
-
-    return buffer_input_array
-
-
-def write_string_to_wav_file(buffer):
-    global_frames.append(buffer)
-
-    wf = wave.open(WAVE_OUTPUT_FILE, 'wb')
-    wf.setnchannels(CHANNELS)
-    wf.setsampwidth(pyaudio.get_sample_size(FORMAT))
-    wf.setframerate(RATE)
-    wf.writeframes(b''.join(global_frames))
+def save_to_wav(audio_data: np.ndarray) -> None:
+    scaled_audio_data = np.int16(audio_data / np.max(np.abs(audio_data)) * 32767)
+    with wave.open(WAVE_OUTPUT_FILE, 'wb') as wav_file:
+        wav_file.setnchannels(1)
+        wav_file.setsampwidth(2)
+        wav_file.setframerate(48000)
+        wav_file.writeframes(scaled_audio_data.tobytes())
 
 
-def preprocess(file_path, hop_length=4096):
-    '''
-    A process to an audio .wav file before execcuting a prediction.
-      Arguments:
-      - file_path - The system path to the audio file.
-      - frame_length - Length of the frame over which to compute the speech features. default: 2048
-      - hop_length - Number of samples to advance for each frame. default: 512
+async def get_ser_result_from_server_message(msg_content) -> Optional[Dict]:
+    global chunk_counter
+    chunk_counter += 1
 
-      Return:
-        'X_3D' variable, containing a shape of: (batch, timesteps, feature) for a single file (batch = 1).
-    '''
-    # Fetch sample rate.
-    _, sr = librosa.load(path=file_path, sr=None)
-    # Load audio file
-    raw_sound = AudioSegment.from_file(file_path, duration=None)
-    # Normalize to 5 dBFS
-    normalized_sound = effects.normalize(raw_sound, headroom=5.0)
-    # Transform the audio file to np.array of samples
-    normal_x = np.array(
-        normalized_sound.get_array_of_samples(), dtype='float32')
-    # Noise reduction
-    final_x = nr.reduce_noise(normal_x, sr=sr)
+    audio_data = np.array(msg_content, dtype=dtype)
+    buffer_deque.extend(audio_data)
 
-    # f1 = librosa.feature.rms(final_x, frame_length=frame_length, hop_length=hop_length, center=True,
-    #                          pad_mode='reflect').T  # Energy - Root Mean Square
-    # f2 = librosa.feature.zero_crossing_rate(final_x, frame_length=frame_length, hop_length=hop_length,
-    #                                         center=True).T  # ZCR
+    if len(buffer_deque) >= MEAN_SIGNAL_LENGTH:
+        # 24 chunks of 4096 at a sampling rate of 48 kHz equal about two seconds
+        if chunk_counter >= 24:
+            audio_to_save = np.array(buffer_deque, dtype=dtype)
+            save_to_wav(audio_to_save)
+            chunk_counter = 0
 
-    # Extracting MFCC feature
-    mfcc = librosa.feature.mfcc(
-        y=final_x, sr=sr, S=None, n_mfcc=40, hop_length=hop_length)
-    mfcc_mean = mfcc.mean(axis=1)
-    mfcc_min = mfcc.min(axis=1)
-    mfcc_max = mfcc.max(axis=1)
-    mfcc_feature = np.concatenate((mfcc_mean, mfcc_min, mfcc_max))
-
-    # Extracting Mel Spectrogram feature
-    mel_spectrogram = librosa.feature.melspectrogram(
-        y=final_x, sr=sr, hop_length=hop_length)
-    mel_spectrogram_mean = mel_spectrogram.mean(axis=1)
-    mel_spectrogram_min = mel_spectrogram.min(axis=1)
-    mel_spectrogram_max = mel_spectrogram.max(axis=1)
-    mel_spectrogram_feature = np.concatenate(
-        (mel_spectrogram_mean, mel_spectrogram_min, mel_spectrogram_max))
-
-    # # Extracting chroma vector feature
-    # chroma = get_chroma_vector(file_path)
-    # chroma_mean = chroma.mean(axis=1)
-    # chroma_min = chroma.min(axis=1)
-    # chroma_max = chroma.max(axis=1)
-    # chroma_feature = numpy.concatenate((chroma_mean, chroma_min, chroma_max))
-    #
-    # # Extracting tonnetz feature
-    # tntz = get_tonnetz(file_path)
-    # tntz_mean = tntz.mean(axis=1)
-    # tntz_min = tntz.min(axis=1)
-    # tntz_max = tntz.max(axis=1)
-    # tntz_feature = numpy.concatenate((tntz_mean, tntz_min, tntz_max))
-    #
-    #    X_3D = np.expand_dims(X, axis=0)
-
-    # return X_3D
-
-    features = np.concatenate((mfcc_feature, mel_spectrogram_feature))
-    features_3D = np.expand_dims(features, axis=0)
-    return features_3D
-
-
-def is_meeting_silence_threshold():
-
-    if not len(global_frames) > 24:
-        return False
-
-    # last_frames = np.array(
-    #     struct.unpack(str(96 * CHUNK) + 'B', np.stack((global_frames[-1], global_frames[-2], global_frames[-3], global_frames[-4],
-    #                                                    global_frames[-5], global_frames[-6], global_frames[-7], global_frames[-8],
-    #                                                    global_frames[-9], global_frames[-10], global_frames[-11], global_frames[-12],
-    #                                                    global_frames[-13], global_frames[-14], global_frames[-15], global_frames[-16],
-    #                                                    global_frames[-17], global_frames[-18], global_frames[-19], global_frames[-20],
-    #                                                    global_frames[-21], global_frames[-22], global_frames[-23], global_frames[-24]),
-    #                                                   axis=0)), dtype='b')
-    # @TODO add real silence detection
-    global_frames.clear()
-    return True
-    # return max(last_frames) < 100
-    # Mean Silence with *24 modifier : -0.685
-    # Mean Normales Reden : -0.638 / -0.608
-    # Mean Wirklich laut: 0.139
-
-
-async def get_ser_result_from_server_message(msg_content: str, websocket) -> None:
-    # get the speech object from message string
-    speech_buffer = await decode_speech_from_string(msg_content)
-    write_string_to_wav_file(speech_buffer)
-    if is_meeting_silence_threshold():
-        return await recognize_emotions_from_wav_file()
-    else:
-        return None
+            return await recognize_emotions_from_wav_file()
 
 
 async def handle_incoming_message_from_websocket(msg_content, msg_time, websocket):
-    ser_result = await get_ser_result_from_server_message(msg_content, websocket)
-    if ser_result != None:
+    ser_result = await get_ser_result_from_server_message(msg_content)
+    if ser_result is not None:
         print('---')
         print(ser_result)
         print('---')
@@ -193,8 +134,8 @@ async def handle_incoming_message_from_websocket(msg_content, msg_time, websocke
 
 
 async def websocket_handler():
-    async with connect(uri) as websocket:
-        await websocket.send(json.dumps([MSG_CODE['CONNECT'], 'I bims: SER']))
+    async with connect(URI) as websocket:
+        await websocket.send(json.dumps([MSG_CODE['CONNECT'], 'SER CONTAINER IS UP AND CONNECTED']))
         # keep websocket open
         while True:
             message = await websocket.recv()
@@ -203,8 +144,9 @@ async def websocket_handler():
             msg_content = msg_json[1]
             msg_time = msg_json[2]
             # only handle SER input messages
-            if (msg_code == MSG_CODE['SER_INPUT']):
+            if msg_code == MSG_CODE['SER_INPUT']:
                 await handle_incoming_message_from_websocket(msg_content, msg_time, websocket)
 
 
-asyncio.run(websocket_handler())
+if __name__ == '__main__':
+    asyncio.run(websocket_handler())

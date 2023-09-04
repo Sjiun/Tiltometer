@@ -7,6 +7,7 @@ const isMockingSerData = false
 
 
 const wss = new WebSocketServer({ port: 5000 })
+console.log('WebSocket server is listening on port 5000')
 
 const MSG_CODE = {
     'CONNECT': 0,
@@ -23,10 +24,9 @@ const MSG_CODE = {
 
 
 wss.on('connection', function connection(ws) {
-    console.log('WebSocket server is listening on port 5000')
+    console.log('New Connection to WebSocket server')
     ws.on('message', function incoming(msgString) {
         handleIncomingMessageFromWs(msgString, ws)
-
     })
     ws.on('close', () => {
         console.log('connection closed')
@@ -61,7 +61,7 @@ function handleIncomingMessageFromWs(msgString, ws) {
             handleConnectMessage(msgContent, msgTime)
             // send dummy request to test SER/FER
             break
-        // audio stream sends Buffer of size 4096 about 10 times per second
+        // audio stream sends Buffer of size 4096 about 12 times per second
         case MSG_CODE['AUDIO_INPUT']:
             handleAudioInputMessage(msgContent, msgTime)
             break
