@@ -1,26 +1,20 @@
-FROM  python:3.10
+FROM python:3.8.10-slim
 
 WORKDIR /ser/
 
 COPY requirements.txt .
 
-RUN apt-get update 
-# pyaudio requirements
-RUN apt-get install libasound-dev libportaudio2 libportaudiocpp0 portaudio19-dev -y
+RUN apt-get update \
+    && apt-get install -y libsndfile1-dev \
+    && apt-get clean
 
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-# copy after install to allow caching installations
-COPY model.h5 .
-COPY input-audio_example.txt .
+COPY 10-fold_weights_best_1.hdf5 .
+COPY __init__.py .
 COPY ser.py .
-
-# RUN apt-get install libgl1-mesa-glx -y
-
-# required for librosa to work
-RUN apt-get install libsndfile1-dev -y
-
-
+COPY ser_model.py .
+COPY TIMNET.py .
+COPY Common_Model.py .
 
 CMD ["python", "ser.py"]
-

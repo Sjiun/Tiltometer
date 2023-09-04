@@ -13,6 +13,7 @@
   };
 
   let ws = new WebSocket("ws://127.0.0.1:5000");
+  ws.binaryType = 'arraybuffer';
 
   ws.onopen = handleConnectionOpened;
   ws.onmessage = handleMessage;
@@ -42,7 +43,7 @@
     console.log("---");
     console.log(data);
     console.log("---");
-    ws.send(JSON.stringify([MSG_CODE["AUDIO_INPUT"], data]));
+    ws.send(JSON.stringify([MSG_CODE["AUDIO_INPUT"], Array.from(data)]));
   };
 </script>
 
