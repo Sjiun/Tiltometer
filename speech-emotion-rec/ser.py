@@ -34,7 +34,7 @@ MSG_CODE = {
 MODEL_PATH = './10-fold_weights_best_1.hdf5'
 RAVDESS_CLASS_LABELS = ("angry", "calm", "disgust", "fear", "happy", "neutral", "sad", "surprise")
 
-model = TIMNET_Model(input_shape=(188, 39), class_labels=RAVDESS_CLASS_LABELS,
+model = TIMNET_Model(input_shape=(215, 39), class_labels=RAVDESS_CLASS_LABELS,
                      filter_size=39, kernel_size=2, stack_size=1, dilation_size=8,
                      dropout=0.1, activation='relu', lr=0.001, beta1=0.93, beta2=0.98, epsilon=1e-8)
 model.load_weights(MODEL_PATH)
@@ -110,7 +110,7 @@ async def get_ser_result_from_server_message(msg_content) -> Optional[Dict]:
     audio_data = np.array(msg_content, dtype=dtype)
     buffer_deque.extend(audio_data)
 
-    if len(buffer_deque) >= MEAN_SIGNAL_LENGTH:
+    if len(buffer_deque) >= BUFFER_CAPACITY:
         # 24 chunks of 4096 at a sampling rate of 48 kHz equal about two seconds
         if chunk_counter >= 24:
             audio_to_save = np.array(buffer_deque, dtype=dtype)
