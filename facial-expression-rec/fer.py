@@ -7,7 +7,7 @@ from io import BytesIO
 
 import numpy as np
 from PIL import Image
-from typing import Dict
+from typing import Dict, Optional
 from websockets import connect
 
 from face_detector import FaceDetector
@@ -42,8 +42,8 @@ def decode_image_from_string(base_64_image: str) -> np.ndarray:
     """
     base_64_image_without_metadata = re.sub('^data:image/.+;base64,', '', base_64_image)
     decoded_image = Image.open(BytesIO(base64.b64decode(base_64_image_without_metadata)))
-    decoded_RGB_image = decoded_image.convert('RGB')
-    return np.array(decoded_RGB_image)
+    decoded_rgb_image = decoded_image.convert('RGB')
+    return np.array(decoded_rgb_image)
 
 
 def recognize_emotions_from_image(image: np.ndarray) -> Dict[str, float]:
@@ -65,18 +65,18 @@ def recognize_emotions_from_image(image: np.ndarray) -> Dict[str, float]:
     }
 
 
-def get_fer_result_from_server_message(msg_content: str) -> Dict[str, float]:
+def get_fer_result_from_server_message(msg_content: str) -> Optional[Dict[str, float]]:
     image_to_recognize = decode_image_from_string(msg_content)
     face_image = face_detector.detect_face(image_to_recognize)
-    if face_image == None:
-            return None
+    if face_image is None:
+        return None
     fer_result = recognize_emotions_from_image(face_image)
     return fer_result
 
 
 async def handle_incoming_message_from_websocket(msg_content: str, msg_time, websocket):
     fer_result = get_fer_result_from_server_message(msg_content)
-    if fer_result != None:
+    if fer_result is not None:
         print('---')
         print('FER result: ', fer_result)
         fer_res_string = json.dumps(fer_result)

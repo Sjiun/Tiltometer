@@ -1,3 +1,5 @@
+from typing import Optional
+
 import numpy as np
 from mediapipe.python.solutions.face_mesh import FaceMesh
 
@@ -8,7 +10,7 @@ class FaceDetector:
         self.face_mesh = \
             FaceMesh(max_num_faces=1, refine_landmarks=True, min_detection_confidence=0.5, min_tracking_confidence=0.5)
 
-    def detect_face(self, image: np.ndarray) -> np.ndarray:
+    def detect_face(self, image: np.ndarray) -> Optional[np.ndarray]:
         """
         Detects a face on the given image and crops it accordingly.
         Returns None if no face is detected.
@@ -17,7 +19,6 @@ class FaceDetector:
         """
         results = self.face_mesh.process(image)
         if not results.multi_face_landmarks:
-            # return image
             return None
         face_landmarks = results.multi_face_landmarks[0]
         height, width, _ = image.shape
