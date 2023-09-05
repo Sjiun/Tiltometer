@@ -3,6 +3,6 @@ mediapipe==0.8.11
 websockets~=10.4
 
 numpy~=1.25.2
-Pillow~=10.0.0
-opencv-python~=4.8.0.76
 onnxruntime~=1.15.1
+opencv-python~=4.8.0.76
+Pillow~=10.0.0

@@ -1,3 +1,14 @@
+This project contains (modified) code and model files that were originally
+developed by Jiaxin Ye (in https://github.com/Jiaxin-Ye/TIM-Net_SER).
+Contact: jiaxin-ye@foxmail.com
+
+While the project description encourages experimenting with the code and
+models, it is not explicitly licensed. This applies to all .py and .hdf5
+files in this directory.
+
+
+Everything else is our own work and licensed under the following license:
+
 The MIT License
 
 Copyright (c) 2023 Pedram Berendjy, Franziska Heil, Kilian Hildebrandt, Sune Maute

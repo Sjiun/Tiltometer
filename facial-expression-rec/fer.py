@@ -1,3 +1,8 @@
+# Copyright 2022 Andrey Savchenko
+# Copyright for modifications 2023 Sune Maute, Thorben Ortmann
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+
 import asyncio
 import base64
 import json

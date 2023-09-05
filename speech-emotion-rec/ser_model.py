@@ -1,3 +1,6 @@
+# Copyright 2023 Jiaxin Ye; Contact: jiaxin-ye@foxmail.com
+# Copyright for modifications 2023 Thorben Ortmann
+
 import tensorflow as tf
 import tensorflow.keras.backend as K
 from tensorflow.keras.layers import Layer, Dense, Input

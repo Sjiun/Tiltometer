@@ -1,3 +1,6 @@
+# Copyright 2023 Jiaxin Ye; Contact: jiaxin-ye@foxmail.com
+# Copyright for modifications 2023 Sune Maute, Thorben Ortmann
+
 import asyncio
 import json
 import socket

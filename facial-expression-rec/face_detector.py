@@ -1,3 +1,8 @@
+# Copyright 2022 Andrey Savchenko
+# Copyright for modifications 2023 Thorben Ortmann
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+
 from typing import Optional
 
 import numpy as np
