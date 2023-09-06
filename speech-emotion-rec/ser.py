@@ -44,6 +44,9 @@ model.load_weights(MODEL_PATH)
 
 MEAN_SIGNAL_LENGTH = 110000
 
+AVERAGE_VOLUME_AMPLITUDE_THRESHOLD = 0.1
+TOTAL_VOLUME_AMPLITUDE_THRESHOLD = 0.4
+
 
 def get_feature(file_path: str,
                 mean_signal_length: int = MEAN_SIGNAL_LENGTH,
@@ -104,6 +107,12 @@ def save_to_wav(audio_data: np.ndarray) -> None:
         wav_file.writeframes(scaled_audio_data.tobytes())
 
 
+def is_too_quiet(audio_data: np.ndarray) -> bool:
+    avg_amplitude = np.mean(np.abs(audio_data))
+    amplitude = np.max(audio_data) - np.min(audio_data)
+    return avg_amplitude < AVERAGE_VOLUME_AMPLITUDE_THRESHOLD and amplitude < TOTAL_VOLUME_AMPLITUDE_THRESHOLD
+
+
 async def get_ser_result_from_server_message(msg_content) -> Optional[Dict]:
     global chunk_counter
     chunk_counter += 1
@@ -114,10 +123,18 @@ async def get_ser_result_from_server_message(msg_content) -> Optional[Dict]:
     if len(buffer_deque) >= BUFFER_CAPACITY:
         # 24 chunks of 4096 at a sampling rate of 48 kHz equal about two seconds
         if chunk_counter >= 24:
-            audio_to_save = np.array(buffer_deque, dtype=dtype)
-            save_to_wav(audio_to_save)
             chunk_counter = 0
+            audio_to_save = np.array(buffer_deque, dtype=dtype)
+            if is_too_quiet(audio_to_save):
+                print("Could not detect loud enough speech for the last time interval.\n"
+                      f"Average Amplitude was: {np.mean(np.abs(audio_to_save)):.4f} but should be more than "
+                      f"{AVERAGE_VOLUME_AMPLITUDE_THRESHOLD}\n"
+                      f"Total Amplitude was: {np.max(audio_data) - np.min(audio_data):.4f} but should be more than "
+                      f"{TOTAL_VOLUME_AMPLITUDE_THRESHOLD}"
+                      )
+                return None
 
+            save_to_wav(audio_to_save)
             return await recognize_emotions_from_wav_file()
 
 
