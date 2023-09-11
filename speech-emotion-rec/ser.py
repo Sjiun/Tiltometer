@@ -113,7 +113,7 @@ def is_too_quiet(audio_data: np.ndarray) -> bool:
     return avg_amplitude < AVERAGE_VOLUME_AMPLITUDE_THRESHOLD and amplitude < TOTAL_VOLUME_AMPLITUDE_THRESHOLD
 
 
-async def get_ser_result_from_server_message(msg_content) -> Optional[Dict]:
+async def get_ser_result_from_server_message(msg_content, msg_time, websocket) -> Optional[Dict]:
     global chunk_counter
     chunk_counter += 1
 
@@ -132,14 +132,15 @@ async def get_ser_result_from_server_message(msg_content) -> Optional[Dict]:
                       f"Total Amplitude was: {np.max(audio_data) - np.min(audio_data):.4f} but should be more than "
                       f"{TOTAL_VOLUME_AMPLITUDE_THRESHOLD}"
                       )
-                return None
-
-            save_to_wav(audio_to_save)
-            return await recognize_emotions_from_wav_file()
+                ser_result_message = json.dumps([MSG_CODE['CONNECT'], "Could not detect loud enough speech for the last time interval.", msg_time])
+                await websocket.send(ser_result_message)
+            else:
+                save_to_wav(audio_to_save)
+                return await recognize_emotions_from_wav_file()
 
 
 async def handle_incoming_message_from_websocket(msg_content, msg_time, websocket):
-    ser_result = await get_ser_result_from_server_message(msg_content)
+    ser_result = await get_ser_result_from_server_message(msg_content, msg_time, websocket)
     if ser_result is not None:
         print('---')
         print(ser_result)
