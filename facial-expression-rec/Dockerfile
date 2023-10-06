@@ -1,10 +1,9 @@
 FROM  python:3.10-slim
 
-WORKDIR /fer/
+# Ensure Python output is direcly sent to terminal
+ENV PYTHONUNBUFFERED=1
 
-COPY enet_b2_7.onnx .
-COPY enet_b0_8_best_vgaf.onnx .
-COPY requirements.txt .
+WORKDIR /app
 
 RUN apt-get update \
     && apt-get install -y \
@@ -13,13 +12,10 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip install -r requirements.txt
 
-# copy after install to allow caching installations
-COPY input-img_example.base64 .
-COPY __init__.py .
-COPY face_detector.py .
-COPY hs_emotion_recognizer.py .
-COPY fer.py .
+COPY requirements.txt /app/
+RUN pip install --no-cache-dir -r requirements.txt
 
-CMD ["python", "fer.py"]
+COPY ./fer /app/fer
+
+CMD ["python", "-m", "fer.main"]
