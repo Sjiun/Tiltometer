@@ -1,0 +1,26 @@
+# Ignore test folder
+fer/test/
+
+# Ignore Python bytecode files
+**/__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore development environment files
+*.env
+*.venv
+*.git
+*.gitignore
+
+# Ignore development and build artifacts
+.DS_Store
+*.swp
+*.swo
+*.bak
+*.tmp
+*.log
+
+# Ignore IDE-specific files
+.idea/
+.vscode/
