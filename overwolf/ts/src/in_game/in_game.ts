@@ -213,11 +213,12 @@ InGame.instance().run();
 
 // ---------
 
+// Magic numbers here until we have a multimodal model or empirical data
 let fer_tilt_value = 0;
-const ferTiltFactor = 0.5;
+const ferTiltFactor = 0.6;
 let last_fer_update = Date.now();
 let ser_tilt_value = 0;
-const serTiltFactor = 0.3;
+const serTiltFactor = 0.2;
 let last_ser_update = Date.now();
 let ge_tilt_value = 0;
 const geTiltFactor = 0.2;
@@ -399,23 +400,18 @@ function calcNewTiltValueFromEvent(type, data) {
       break;
     case "fer":
       const secsSinceLastFerUpd = (timeNow - last_fer_update) / 1000;
-      fer_tilt_value =
-        (secsSinceLastFerUpd / 100) * getTiltValueFromFerData(data) +
-        ((100 - secsSinceLastFerUpd) / 100) * fer_tilt_value;
-      fer_tilt_value *= -1;
+      const ferSmoothingFactor = Math.min(secsSinceLastFerUpd / 100, 0.5);
+      fer_tilt_value = ferSmoothingFactor * getTiltValueFromFerData(data) + (1 - ferSmoothingFactor) * fer_tilt_value;
       last_fer_update = timeNow;
       break;
     case "ser":
       const secsSinceLastSerUpd = (timeNow - last_ser_update) / 1000;
-      ser_tilt_value =
-        (secsSinceLastSerUpd / 100) * getTiltValueFromSerData(data) +
-        ((100 - secsSinceLastSerUpd) / 100) * ser_tilt_value;
-      ser_tilt_value *= -1;
+      const serSmoothingFactor = Math.min(secsSinceLastSerUpd / 100, 0.5);
+      ser_tilt_value = serSmoothingFactor * getTiltValueFromSerData(data) + (1 - serSmoothingFactor) * ser_tilt_value;
       last_ser_update = timeNow;
       break;
     case "ge":
-      // ge_tilt_value += getTiltValueFromGameEventData(data);
-      ge_tilt_value -= getTiltValueFromGameEventData(data);
+      ge_tilt_value += getTiltValueFromGameEventData(data);
       break;
     default:
       break;
@@ -434,24 +430,24 @@ function getRandomFloat() {
 
 function getTiltValueFromFerData(ferData) {
   let tilt = 0.0;
-  tilt -= ferData.angry / 2;
-  tilt += ferData.happy;
-  tilt -= ferData.sad / 2;
+  tilt += ferData.angry;
+  tilt += ferData.sad * 0.2;
+  tilt -= ferData.happy;
   // surprise can be good or bad depending on which other emotions dominate
   const threshold = 0.1;
   if (
     ferData.happy - threshold >= ferData.angry &&
     ferData.happy - threshold >= ferData.sad
   ) {
-    tilt += ferData.surprise;
+    tilt -= ferData.surprise;
   }
   if (
     ferData.angry - threshold > ferData.happy ||
     ferData.sad - threshold > ferData.happy
   ) {
-    tilt -= ferData.surprise;
+    tilt += ferData.surprise;
   }
-  return tilt / 5;
+  return tilt;
 }
 
 function getTiltValueFromSerData(serData) {
@@ -481,19 +477,19 @@ function getTiltValueFromGameEventData(data) {
 
   switch (data) {
     case "death":
-      return -0.6;
-    case "assist":
-      return 0.1;
-    case "kill":
-      return 0.2;
-    case "double_kill":
-      return 0.3;
-    case "triple_kill":
-      return 0.4;
-    case "quadra_kill":
-      return 0.4;
-    case "penta_kill":
       return 1.0;
+    case "assist":
+      return -0.4;
+    case "kill":
+      return -0.8;
+    case "double_kill":
+      return -0.9;
+    case "triple_kill":
+      return -1.0;
+    case "quadra_kill":
+      return -1.2;
+    case "penta_kill":
+      return -2.0;
   }
 }
 
@@ -513,12 +509,12 @@ function renderTiltValue() {
   console.log("TILT: ", total_tilt_value);
   tiltValue.innerText = total_tilt_value.toFixed(4);
   tiltOMeter.updateTiltValue(total_tilt_value);
-  if (total_tilt_value < -0.5) {
-    chickenImg.src = "/img/chicken_horror.png";
+  if (total_tilt_value < -0.2) {
+    chickenImg.src = "/img/chicken_happy.png";
     chickenImg.style.width = "120px";
     chickenImg.style.transform = "translate(-40px, 0%)";
   } else if (total_tilt_value > 0.5) {
-    chickenImg.src = "/img/chicken_happy.png";
+    chickenImg.src = "/img/chicken_horror.png";
     chickenImg.style.width = "240px";
     chickenImg.style.transform = "translate(-30px, 0%)";
   } else {
