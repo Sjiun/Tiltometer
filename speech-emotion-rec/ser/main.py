@@ -37,8 +37,10 @@ Our training data's (RAVDESS) original average signal_length is about 192k (48 k
 BUFFER_CAPACITY = 192000
 buffer_deque = deque(maxlen=BUFFER_CAPACITY)
 dtype = np.float32
-chunk_counter = 0
+AVERAGE_VOLUME_AMPLITUDE_THRESHOLD = 0.1
+TOTAL_VOLUME_AMPLITUDE_THRESHOLD = 0.4
 WAVE_OUTPUT_FILE = "output.wav"
+chunk_counter = 0
 
 
 async def recognize_emotions_from_wav_file() -> Dict[str, float]:
@@ -65,6 +67,12 @@ def save_to_wav(audio_data: np.ndarray) -> None:
         wav_file.writeframes(scaled_audio_data.tobytes())
 
 
+def is_too_quiet(audio_data: np.ndarray) -> bool:
+    average_amplitude = np.mean(np.abs(audio_data))
+    total_amplitude = np.max(audio_data) - np.min(audio_data)
+    return average_amplitude < AVERAGE_VOLUME_AMPLITUDE_THRESHOLD or total_amplitude < TOTAL_VOLUME_AMPLITUDE_THRESHOLD
+
+
 async def get_ser_result_from_server_message(msg_content) -> Optional[Dict]:
     global chunk_counter
     chunk_counter += 1
@@ -75,6 +83,14 @@ async def get_ser_result_from_server_message(msg_content) -> Optional[Dict]:
     # 12 chunks of 4096 at a sampling rate of 48 kHz equal about one second
     if len(buffer_deque) >= BUFFER_CAPACITY and chunk_counter >= 12:
         audio_to_save = np.array(buffer_deque, dtype=dtype)
+        if is_too_quiet(audio_to_save):
+            print("\nCould not detect loud enough speech for the last time interval.\n"
+                  f"Average Amplitude was: {np.mean(np.abs(audio_to_save)):.4f} but should be more than "
+                  f"{AVERAGE_VOLUME_AMPLITUDE_THRESHOLD}\n"
+                  f"Total Amplitude was: {np.max(audio_data) - np.min(audio_data):.4f} but should be more than "
+                  f"{TOTAL_VOLUME_AMPLITUDE_THRESHOLD}"
+                  )
+            return None
         save_to_wav(audio_to_save)
         chunk_counter = 0
 
