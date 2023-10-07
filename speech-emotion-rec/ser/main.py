@@ -1,6 +1,3 @@
-# Copyright 2023 Jiaxin Ye; Contact: jiaxin-ye@foxmail.com
-# Copyright for modifications 2023 Sune Maute, Thorben Ortmann
-
 import asyncio
 import json
 import socket
@@ -8,11 +5,10 @@ import wave
 from collections import deque
 from typing import Optional, Dict
 
-import librosa
 import numpy as np
 from websockets import connect
 
-from ser_model import TIMNET_Model
+from ser.timnet.main import get_feature, get_model
 
 # Address of the WebSocket server, which is expected run at the docker host machine.
 # The code below should work on Windows with Docker Desktop.
@@ -32,48 +28,13 @@ MSG_CODE = {
     'CSV_EXPORT': 9,
 }
 
-# Model and Feature Extraction Code is based on https://github.com/Jiaxin-Ye/TIM-Net_SER
-
-MODEL_PATH = './10-fold_weights_best_1.hdf5'
-RAVDESS_CLASS_LABELS = ("angry", "calm", "disgust", "fear", "happy", "neutral", "sad", "surprise")
-
-model = TIMNET_Model(input_shape=(215, 39), class_labels=RAVDESS_CLASS_LABELS,
-                     filter_size=39, kernel_size=2, stack_size=1, dilation_size=8,
-                     dropout=0.1, activation='relu', lr=0.001, beta1=0.93, beta2=0.98, epsilon=1e-8)
-model.load_weights(MODEL_PATH)
-
-MEAN_SIGNAL_LENGTH = 110000
-
-
-def get_feature(file_path: str,
-                mean_signal_length: int = MEAN_SIGNAL_LENGTH,
-                embed_len: int = 39) -> np.ndarray:
-    signal, fs = librosa.load(file_path)
-    s_len = len(signal)
-    if s_len < mean_signal_length:
-        pad_len = mean_signal_length - s_len
-        pad_rem = pad_len % 2
-        pad_len //= 2
-        signal = np.pad(signal, (pad_len, pad_len + pad_rem), 'constant', constant_values=0)
-    else:
-        pad_len = s_len - mean_signal_length
-        pad_len //= 2
-        signal = signal[pad_len:pad_len + mean_signal_length]
-
-    mfcc = librosa.feature.mfcc(y=signal, sr=fs, n_mfcc=embed_len)
-    feature = np.transpose(mfcc)
-    return feature
-
+model = get_model()
 
 '''
-Following the training of the model we are using, we want a signal_length of 110k.
-The original feature extraction loads data at librosa's default sampling rate of 22.05 kHz
-Our training data's (RAVDESS) original sampling rate is 48 kHz.
 We receive data in chunks as Float32Arrays of length 4096 from the device manager. Data is recorded at 48 kHz.
-To achieve a signal_length of 110k, we need a buffer capacity of 110000/(22.05/48)=239456 for the data sampled at 48kHz.
-That is about 5 seconds.
+Our training data's (RAVDESS) original average signal_length is about 192k (48 kHz * 4 seconds) = BUFFER_CAPACITY.
 '''
-BUFFER_CAPACITY = 239456
+BUFFER_CAPACITY = 192000
 buffer_deque = deque(maxlen=BUFFER_CAPACITY)
 dtype = np.float32
 chunk_counter = 0
@@ -86,10 +47,10 @@ async def recognize_emotions_from_wav_file() -> Dict[str, float]:
     prediction_array = model.predict(feature_vector).tolist()
 
     prediction = {
-        "neutral": prediction_array[5],
-        "happy": prediction_array[4],
-        "sad": prediction_array[6],
         "angry": prediction_array[0],
+        "happy": prediction_array[4],
+        "neutral": prediction_array[5],
+        "sad": prediction_array[6],
         "surprise": prediction_array[7],
     }
     return prediction
@@ -111,14 +72,13 @@ async def get_ser_result_from_server_message(msg_content) -> Optional[Dict]:
     audio_data = np.array(msg_content, dtype=dtype)
     buffer_deque.extend(audio_data)
 
-    if len(buffer_deque) >= BUFFER_CAPACITY:
-        # 24 chunks of 4096 at a sampling rate of 48 kHz equal about two seconds
-        if chunk_counter >= 24:
-            audio_to_save = np.array(buffer_deque, dtype=dtype)
-            save_to_wav(audio_to_save)
-            chunk_counter = 0
+    # 12 chunks of 4096 at a sampling rate of 48 kHz equal about one second
+    if len(buffer_deque) >= BUFFER_CAPACITY and chunk_counter >= 12:
+        audio_to_save = np.array(buffer_deque, dtype=dtype)
+        save_to_wav(audio_to_save)
+        chunk_counter = 0
 
-            return await recognize_emotions_from_wav_file()
+        return await recognize_emotions_from_wav_file()
 
 
 async def handle_incoming_message_from_websocket(msg_content, msg_time, websocket):

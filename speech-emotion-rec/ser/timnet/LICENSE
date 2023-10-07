@@ -1,10 +1,15 @@
-This project contains (modified) code and models originally developed
-by Jiaxin Ye. Contact: jiaxin-ye@foxmail.com.
-The original code and models are licensed under
-GNU General Public License v3.0, as one may see here:
-https://github.com/Jiaxin-Ye/TIM-Net_SER/blob/0511735616d23d24010428c5dc936cabfba95010/LICENSE
-Consequently, the contents of this directory are licensed under the
-same license.
+The contents of this directory are based on work of Jiaxin Ye.
+Contact: jiaxin-ye@foxmail.com.
+Code: https://github.com/Jiaxin-Ye/TIM-Net_SER/tree/0511735616d23d24010428c5dc936cabfba95010/Code
+Model(s): https://drive.google.com/drive/folders/1ZjgcT6R0A0C2twXatgpimFh1a3IL81pw
+
+The original code and models are licensed under the GNU General Public License v3.0, as one may see here:
+https://github.com/Jiaxin-Ye/TIM-Net_SER/blob/0511735616d23d24010428c5dc936cabfba95010/LICENSE.
+One may find the complete license below.
+
+Modifications to the code were made by Sune Maute and Thorben Ortmann in 2023, and
+these modifications are also licensed under the GNU General Public License v3.0.
+One may find a copyright notice at the beginning of every Python file in this directory.
 
 
                     GNU GENERAL PUBLIC LICENSE
