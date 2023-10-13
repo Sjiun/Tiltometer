@@ -1,4 +1,5 @@
 # Copyright 2023 Jiaxin Ye; Contact: jiaxin-ye@foxmail.com
+# https://github.com/Jiaxin-Ye/TIM-Net_SER/blob/0511735616d23d24010428c5dc936cabfba95010/Code/Model.py
 # Copyright for modifications 2023 Thorben Ortmann
 
 import tensorflow as tf
@@ -7,8 +8,8 @@ from tensorflow.keras.layers import Layer, Dense, Input
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
 
-from Common_Model import Common_Model
-from TIMNET import TIMNET
+from ser.timnet.common_model import Common_Model
+from ser.timnet.timnet import TIMNET
 
 
 def smooth_labels(labels, factor=0.1):

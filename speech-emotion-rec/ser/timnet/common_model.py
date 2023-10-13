@@ -1,6 +1,7 @@
 """
 @author: Jiaxin Ye
 @contact: jiaxin-ye@foxmail.com
+https://github.com/Jiaxin-Ye/TIM-Net_SER/blob/0511735616d23d24010428c5dc936cabfba95010/Code/Common_Model.py
 """
 import sys
 

@@ -1,7 +1,9 @@
 """
 @author: Jiaxin Ye
 @contact: jiaxin-ye@foxmail.com
+https://github.com/Jiaxin-Ye/TIM-Net_SER/blob/0511735616d23d24010428c5dc936cabfba95010/Code/TIMNET.py
 """
+
 import tensorflow as tf
 import tensorflow.keras.backend as K
 from tensorflow.keras.activations import sigmoid
