@@ -1,4 +1,9 @@
-# README
+# Tilt-O-Meter
+
+Our worked was presented at the demo session of the conference on
+[Affective Computing and Intelligent Interaction (ACII)](https://acii-conf.net/2023/) in September 2023.
+The corresponding demo paper _Tiltometer: Real-Time Tilt Recognition in Esports_ is available at
+https://doi.org/10.1109/ACIIW59127.2023.10388192.
 
 ## About
 
@@ -125,8 +130,17 @@ In order to run the "Tilt-O-Meter", the
     docker run --rm ser
     ```
 5. Run the Overwolf extension (from shortcut or development options)
-1. Run League of Legends
+6. Run League of Legends
 
 ## Referencing
 
-If you use the app or parts of it in your work, please reference our paper at [https://ieeexplore.ieee.org/document/10388192](https://ieeexplore.ieee.org/document/10388192).
+If you use the app or parts of it in your work, please reference [our paper](https://doi.org/10.1109/ACIIW59127.2023.10388192):
+```
+@INPROCEEDINGS{10388192,
+  author={Ortmann, Thorben and Maute, Sune and Heil, Franziska and Hildebrandt, Kilian and Jorshery, Pedram Berendjy and Putzar, Larissa},
+  booktitle={2023 11th International Conference on Affective Computing and Intelligent Interaction Workshops and Demos (ACIIW)}, 
+  title={Tiltometer: Real-Time Tilt Recognition in Esports}, 
+  year={2023},
+  pages={1-3},
+  doi={10.1109/ACIIW59127.2023.10388192}}
+```
