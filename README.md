@@ -126,3 +126,8 @@ In order to run the "Tilt-O-Meter", the
     ```
 5. Run the Overwolf extension (from shortcut or development options)
 1. Run League of Legends
+2. 
+
+## Referencing
+
+If you use the app or parts of it in your work, please reference our paper at [https://ieeexplore.ieee.org/document/10388192](https://ieeexplore.ieee.org/document/10388192).
