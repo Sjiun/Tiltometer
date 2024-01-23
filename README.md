@@ -1,4 +1,7 @@
 # README
+This version of the code was used at the [demo session of the ACII (Affect Computing + Intelligent Interaction) conference](https://acii-conf.net/2023/program/full-schedule/)
+on the 12th of September 2023.  
+Corresponding demo paper: [Tiltometer: Real-Time Tilt Recognition in Esports](https://doi.org/10.1109/ACIIW59127.2023.10388192)
 
 ## About
 
