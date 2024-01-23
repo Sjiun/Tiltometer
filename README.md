@@ -1,6 +1,6 @@
 # Tilt-O-Meter
 
-Our worked was presented at the demo session of the conference on
+Our work was presented at the demo session of the conference on
 [Affective Computing and Intelligent Interaction (ACII)](https://acii-conf.net/2023/) in September 2023.
 The corresponding demo paper _Tiltometer: Real-Time Tilt Recognition in Esports_ is available at
 https://doi.org/10.1109/ACIIW59127.2023.10388192.
